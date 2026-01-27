@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import localFont from 'next/font/local'
+import Logo from '@/app/icons/logo.svg'
+
 const arsenal_SC = localFont({
 	src: [
 		{ path: './fonts/Arsenal_SC/ArsenalSC-Regular.ttf', weight: '400' },
@@ -22,7 +24,10 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={`${arsenal_SC.className} antialiased bg-background`}>{children}</body>
+			<body className={`${arsenal_SC.className} antialiased bg-background`}>
+				<div className="px-6 py-7 flex flex-col items-center"><Logo className="w-fit" /></div>
+				{children}
+			</body>
 		</html>
 	)
 }

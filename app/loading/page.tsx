@@ -3,7 +3,6 @@ import { Grid } from 'react-loader-spinner'
 export default function Loading() {
 	return (
 		<div className="px-6 py-7 flex flex-col items-center">
-			<Logo className="w-fit" />
 			<div className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center">
 				<div className="mb-25">
 					<Grid
