@@ -1,7 +1,12 @@
-'use client'
+import StarIcon from './icons/star.svg';
 
 export default function Home() {
   return (
-    <div></div>
+    <main>
+      <StarIcon 
+        className="w-24 h-24" 
+        title="Star icon"
+      />
+    </main>
   );
 }
