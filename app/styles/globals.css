@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 html{
-	font-size: 2dvh;
+	font-size: clamp(8px, 1.5dvh, 24px);
 }
 
 @theme {

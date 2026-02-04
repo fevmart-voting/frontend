@@ -45,7 +45,7 @@ export default function Podium() {
 				className="grid grid-cols-[5rem_1fr] gap-3 items-center w-full">
 				<h3 className="text-text-bright text-[32px]">{cl}</h3>
 
-				<div className="ml-4 relative">
+				<div className="ml-[max(4vw,4rem)] relative">
 					<div
 						className={`${cl === topMiss ? 'bg-secondary text-text-dark' : 'bg-dark-2 text-text-bright'} py-3.5 rounded-xl flex items-center justify-end`}
 						style={{ width: `${width * 100}%` }}>
@@ -58,26 +58,26 @@ export default function Podium() {
 
 	return (
 		<div className="py-7 flex flex-col items-center">
-			<p className="pt-8 mb-5 text-[48px] font-bold text-secondary text-center leading-tight">Подиум</p>
+			<div className="w-full absolute bottom-[55dvh] translate-y-1/2 px-[max(4vw,2rem)]">
+				<p className="pt-8 mb-5 text-[48px] font-bold text-secondary text-center leading-tight">Подиум</p>
 
-			<div className="w-full border-border-dark-2 border-2 p-1 grid grid-cols-2 h-fit rounded-lg">
-				<button
-					className={`${selectedTopic === 'miss' ? 'bg-secondary text-text-dark' : 'bg-background text-text-bright'} duration-300 ease-in-out py-4 rounded-2xl`}
-					onClick={() => toggleTopicButton('miss')}>
-					<h3 className="text-xl">Мисс</h3>
-				</button>
-				<button
-					className={`${selectedTopic === 'class' ? 'bg-secondary text-text-dark' : 'bg-background  text-text-bright'} duration-300 ease-in-out py-4  rounded-2xl`}
-					onClick={() => toggleTopicButton('class')}>
-					<h3 className="text-xl">Класс</h3>
-				</button>
+				<div className="w-full border-border-dark-2 border-2 p-1 grid grid-cols-2 h-fit rounded-lg mb-10">
+					<button
+						className={`${selectedTopic === 'miss' ? 'bg-secondary text-text-dark' : 'bg-background text-text-bright'} duration-300 ease-in-out py-4 rounded-2xl`}
+						onClick={() => toggleTopicButton('miss')}>
+						<h3 className="text-xl">Мисс</h3>
+					</button>
+					<button
+						className={`${selectedTopic === 'class' ? 'bg-secondary text-text-dark' : 'bg-background  text-text-bright'} duration-300 ease-in-out py-4  rounded-2xl`}
+						onClick={() => toggleTopicButton('class')}>
+						<h3 className="text-xl">Класс</h3>
+					</button>
+				</div>
+
+				<Table tableName="Podium">{chart}</Table>
 			</div>
 
-			<ul className="w-full absolute bottom-1/2 translate-y-1/2 px-4">
-				<Table tableName="Podium">{chart}</Table>
-			</ul>
-
-			<footer className="w-full absolute bottom-18 px-4">
+			<footer className="w-full absolute bottom-18 px-[max(4vw,2rem)]">
 				<Button>Переголосовать</Button>
 			</footer>
 		</div>
