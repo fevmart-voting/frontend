@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+html{
+	font-size: 2dvh;
+}
+
 @theme {
 	/*General COLORS*/
 	--color-dark: #201f25;
