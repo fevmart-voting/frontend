@@ -1,0 +1,31 @@
+@import 'tailwindcss';
+
+html{
+	font-size: clamp(8px, 1.5dvh, 24px);
+}
+
+@theme {
+	/*General COLORS*/
+	--color-dark: #201f25;
+	--color-dark-2: #363640;
+	--color-bright: #fefefe;
+	--color-bright-01: rgba(255, 255, 255, 0.1);
+	--color-secondary: #CAF247;
+
+	/*Specific COLORS */
+	--color-background: var(--color-dark);	
+
+	--color-text-bright: var(--color-bright);
+	--color-text-dark: var(--color-dark);
+
+	--color-border-bright: var(--color-bright);
+	--color-border-dark: var(--color-dark);
+	--color-border-dark-2: var(--color-dark-2);
+	--color-border-bright-01: var(--color-bright-01);
+
+	
+	/*Unspecific vars*/
+	--text-3.5xl: 2rem;
+	--text-2.5xl: 1.75rem;
+  --font-unbounded: var(--font-unbounded-next), sans-serif;
+}
