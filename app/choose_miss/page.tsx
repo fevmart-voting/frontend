@@ -63,7 +63,7 @@ export default function ChooseMiss() {
 	})
 
 	return (
-		<div className="py-7 flex flex-col items-center absolute bottom-1/2 translate-y-1/2 left-0 px-4 w-full">
+		<div className="py-7 flex flex-col items-center absolute bottom-1/2 translate-y-1/2 left-0 px-[max(4vw,4rem)] w-full">
 			<h1 className="text-3.5xl mb-16 font-bold text-secondary text-center leading-tight">Выберите Мисс ФевМарт</h1>
 
 			<div className="w-full">
@@ -71,7 +71,7 @@ export default function ChooseMiss() {
 					<Table tableName="chooseClass">{options}</Table>
 				</div>
 
-				<div className="absolute -bottom-20 left-0 w-full px-4">
+				<div className="absolute -bottom-20 left-0 w-full px-[max(4vw,4rem)]">
 					<Button>Продолжить</Button>
 				</div>
 			</div>

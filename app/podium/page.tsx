@@ -1,54 +1,71 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Button from '@/app/components/button'
 import Table from '../components/table'
 
-const data1 = {
-	'10A': 63,
-	'10Б': 69,
-	'10В': 52,
-	'10Г': 67,
-	'10Д': 65,
+interface DataEntry {
+	title: string
+	votes: number
 }
 
-const data2 = {
-	'10A': 50,
-	'10Б': 56,
-	'10В': 69,
-	'10Г': 71,
-	'10Д': 70,
-}
+const CLASS_VOTES: DataEntry[] = [
+	{ title: '10A', votes: 63 },
+	{ title: '10Б', votes: 69 },
+	{ title: '10В', votes: 52 },
+	{ title: '10Г', votes: 67 },
+	{ title: '10Д', votes: 65 },
+]
 
-type tabOptions = "miss" | "class"
+const PERSON_VOTES: DataEntry[] = [
+	{ title: '10A', votes: 50 },
+	{ title: '10Б', votes: 56 },
+	{ title: '10В', votes: 69 },
+	{ title: '10Г', votes: 71 },
+	{ title: '10Д', votes: 70 },
+]
+
+type tabOptions = 'miss' | 'class'
 
 export default function Podium() {
-	const dataArray = Object.entries(data1)
-
-	const maxVotesM = Math.max(...Object.values(data2))
-
-	const topMiss = Object.entries(data2).sort(([, a], [, b]) => b - a)[0][0]
-	const dataArrayM = Object.entries(data2)
-
 	const [selectedTopic, setSelectedTopic] = useState<tabOptions>('miss')
 
-	const toggleTopicButton = (topic:tabOptions) => {
+	const toggleTopicButton = (topic: tabOptions) => {
 		setSelectedTopic(() => topic)
 	}
 
-	const chart = (selectedTopic === 'miss' ? dataArrayM : dataArray).map(([cl, votes]) => {
-		const width = votes / maxVotesM
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const { sortedData, q, d } = useMemo(() => {
+		const rawData = selectedTopic === 'miss' ? PERSON_VOTES : CLASS_VOTES
+		const sorted = [...rawData].sort((a, b) => b.votes - a.votes)
+
+		const qVal = sorted.length > 0 ? sorted[sorted.length - 1].votes : 0
+		const wVal = sorted.length > 0 ? sorted[0].votes : 0
+		const dVal = wVal - qVal
+
+		return { sortedData: sorted, q: qVal, d: dVal }
+	}, [selectedTopic])
+
+	const calculateWidth = (votes: number) => {
+		return (votes / sortedData[0]?.votes) * 100 // get percentage of max width
+	}
+
+	const winnerTitle = sortedData[0]?.title
+
+	const chart = sortedData.map(({ title, votes }: DataEntry) => {
+		const width = calculateWidth(votes)
+		const isWinner = title === winnerTitle
 
 		return (
 			<div
-				key={cl}
-				className="grid grid-cols-[5rem_1fr] gap-3 items-center w-full">
-				<h3 className="text-text-bright text-[32px]">{cl}</h3>
+				key={title}
+				className="grid grid-cols-[6ch_1fr] gap-[clamp(12px,4vw,24px)] items-center w-full">
+				<h3 className="text-text-bright text-4xl">{title}</h3>
 
-				<div className="ml-[max(4vw,4rem)] relative">
+				<div className="relative">
 					<div
-						className={`${cl === topMiss ? 'bg-secondary text-text-dark' : 'bg-dark-2 text-text-bright'} py-3.5 rounded-xl flex items-center justify-end`}
-						style={{ width: `${width * 100}%` }}>
+						className={`${isWinner ? 'bg-secondary text-text-dark' : 'bg-dark-2 text-text-bright'} py-3.5 rounded-xl flex items-center justify-end`}
+						style={{ width: `${width}%` }}>
 						<h3 className={`font-medium text-xl pr-4`}>{votes}</h3>
 					</div>
 				</div>

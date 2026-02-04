@@ -63,7 +63,7 @@ export default function ChooseClass() {
 	})
 
 	return (
-		<div className="py-7 flex flex-col items-center absolute bottom-1/2 translate-y-1/2 left-0 px-4">
+		<div className="py-7 flex flex-col items-center absolute bottom-1/2 translate-y-1/2 left-0 px-[max(4vw,4rem)] w-full">
 			<h1 className="mb-16 text-3.5xl font-bold text-secondary text-center leading-tight">Выберите Класс с лучшим выступлением</h1>
 
 			<form className="w-full">
@@ -71,7 +71,7 @@ export default function ChooseClass() {
 					<Table tableName="chooseClass">{options}</Table>
 				</div>
 
-				<div className="absolute -bottom-20 left-0 w-full px-4">
+				<div className="absolute -bottom-20 left-0 w-full px-[max(4vw,4rem)]">
 					<Button>Продолжить</Button>
 				</div>
 			</form>
