@@ -1,117 +1,85 @@
 'use client'
 
-import { useState } from 'react';
+import { useState } from 'react'
+import Button from '@/app/components/button'
+import Table from '../components/table'
+
+const data1 = {
+	'10A': 63,
+	'10Б': 69,
+	'10В': 52,
+	'10Г': 67,
+	'10Д': 65,
+}
+
+const data2 = {
+	'10A': 50,
+	'10Б': 56,
+	'10В': 69,
+	'10Г': 71,
+	'10Д': 70,
+}
+
+type tabOptions = "miss" | "class"
 
 export default function Podium() {
+	const dataArray = Object.entries(data1)
 
-    const data1 = {
-        "10A" : 63,
-        "10Б" : 69,
-        "10В" : 52,
-        "10Г" : 67,
-        "10Д" : 65,
-    };
+	const maxVotesM = Math.max(...Object.values(data2))
 
-    const data2 = {
-        "10A" : 50,
-        "10Б" : 56,
-        "10В" : 69,
-        "10Г" : 71,
-        "10Д" : 70,
-    };
+	const topMiss = Object.entries(data2).sort(([, a], [, b]) => b - a)[0][0]
+	const dataArrayM = Object.entries(data2)
 
-    const maxVotes = Math.max(...Object.values(data1));
+	const [selectedTopic, setSelectedTopic] = useState<tabOptions>('miss')
 
-    const topClass = Object.entries(data1).sort(([,a], [,b]) => b - a)[0][0];
-    const dataArray = Object.entries(data1);
+	const toggleTopicButton = (topic:tabOptions) => {
+		setSelectedTopic(() => topic)
+	}
 
+	const chart = (selectedTopic === 'miss' ? dataArrayM : dataArray).map(([cl, votes]) => {
+		const width = votes / maxVotesM
 
-    const maxVotesM = Math.max(...Object.values(data2));
+		return (
+			<div
+				key={cl}
+				className="grid grid-cols-[5rem_1fr] gap-3 items-center w-full">
+				<h3 className="text-text-bright text-[32px]">{cl}</h3>
 
-    const topMiss = Object.entries(data2).sort(([,a], [,b]) => b - a)[0][0];
-    const dataArrayM = Object.entries(data2);
+				<div className="ml-4 relative">
+					<div
+						className={`${cl === topMiss ? 'bg-secondary text-text-dark' : 'bg-dark-2 text-text-bright'} py-3.5 rounded-xl flex items-center justify-end`}
+						style={{ width: `${width * 100}%` }}>
+						<h3 className={`font-medium text-xl pr-4`}>{votes}</h3>
+					</div>
+				</div>
+			</div>
+		)
+	})
 
+	return (
+		<div className="py-7 flex flex-col items-center">
+			<p className="pt-8 mb-5 text-[48px] font-bold text-secondary text-center leading-tight">Подиум</p>
 
-    const [selectedTopic, setSelectedTopic] = useState<string | null>("мисс");
+			<div className="w-full border-border-dark-2 border-2 p-1 grid grid-cols-2 h-fit rounded-lg">
+				<button
+					className={`${selectedTopic === 'miss' ? 'bg-secondary text-text-dark' : 'bg-background text-text-bright'} duration-300 ease-in-out py-4 rounded-2xl`}
+					onClick={() => toggleTopicButton('miss')}>
+					<h3 className="text-xl">Мисс</h3>
+				</button>
+				<button
+					className={`${selectedTopic === 'class' ? 'bg-secondary text-text-dark' : 'bg-background  text-text-bright'} duration-300 ease-in-out py-4  rounded-2xl`}
+					onClick={() => toggleTopicButton('class')}>
+					<h3 className="text-xl">Класс</h3>
+				</button>
+			</div>
 
-    const toggleTopicButton = () => {
-        setSelectedTopic(selectedTopic === "мисс" ? "класс" : "мисс");
-    };
+			<ul className="w-full absolute bottom-1/2 translate-y-1/2 px-4">
+				<Table tableName="Podium">{chart}</Table>
+			</ul>
 
-    return (
-        <div className="px-6 py-7 flex flex-col items-center">
-            <p className="pt-8 w-[270px] text-[48px] font-bold text-[#FF991C] text-center leading-tight">
-                Подиум
-            </p>
-
-            <div className='pt-10'>
-                <button
-                    className={`bg-[#FF991C] text-bright h-[54px] w-[165px] rounded-l-xl border-2 border-r-1 border-white text-[32px] ${selectedTopic === "мисс" ? 'bg-[#FF991C] font-bold' : 'bg-black'}`}
-                    onClick={toggleTopicButton}
-                >
-                    Мисс
-                </button>
-                <button
-                    className={`bg-[#FF991C] text-bright h-[54px] w-[165px] rounded-r-xl border-2 border-l-1 border-white text-[32px] ${selectedTopic === "класс" ? 'bg-[#FF991C] font-bold' : 'bg-black'}`}
-                    onClick={toggleTopicButton}
-                >
-                    Класс
-                </button>
-            </div>
-
-            { 
-            (selectedTopic === "мисс") ?
-                <div className="p-4 space-y-4 mt-6">
-                    {dataArrayM.map(([className, votes]) => {
-                        const width = (votes / maxVotesM) * 255;
-
-                        return (
-                            <div key={className} className="flex items-center">
-                                <span className="text-white text-[32px] w-12">{className}</span>
-                                
-                                <div className="ml-4 relative">
-                                    <div 
-                                        className={`h-10 rounded-r-xl flex items-center justify-end
-                                            ${className === topMiss ? 'bg-[#FF991C]' : 'bg-white'}`}
-                                        style={{ width: `${width}px` }}
-                                    >
-                                        
-                                        <span className={`font-bold text-[24px] pr-4 ${className === topMiss ? 'text-bright' : 'text-black'}`} >
-                                            {votes}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            :
-                <div className="p-4 space-y-4 mt-6">
-                    {dataArray.map(([className, votes]) => {
-                        const width = (votes / maxVotes) * 255;
-
-                        return (
-                            <div key={className} className="flex items-center">
-                                <span className="text-white text-[32px] w-12">{className}</span>
-                                
-                                <div className="ml-4 relative">
-                                    <div 
-                                        className={`h-10 rounded-r-xl flex items-center justify-end
-                                            ${className === topClass ? 'bg-[#FF991C]' : 'bg-white'}`}
-                                        style={{ width: `${width}px` }}
-                                    >
-                                        
-                                        <span className={`font-bold text-[24px] pr-4 ${className === topClass ? 'text-bright' : 'text-black'}`} >
-                                            {votes}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            } 
-
-        </div>
-    )
+			<footer className="w-full absolute bottom-18 px-4">
+				<Button>Переголосовать</Button>
+			</footer>
+		</div>
+	)
 }

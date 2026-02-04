@@ -1,4 +1,3 @@
-import Logo from '@/app/icons/logo.svg'
 import { Grid } from 'react-loader-spinner'
 export default function Loading() {
 	return (
@@ -9,7 +8,7 @@ export default function Loading() {
 						visible={true}
 						height="120"
 						width="120"
-						color="#FF991C"
+						color="#CAF247"
 						ariaLabel="grid-loading"
 						radius="12.5"
 						wrapperStyle={{}}
@@ -17,7 +16,7 @@ export default function Loading() {
 					/>
 				</div>
 
-				<p className="text-center text-bright text-4xl">Голосование ещё не началось, пожалуйста подождите...</p>
+				<p className="text-center text-bright text-2xl">Голосование ещё не началось, пожалуйста подождите...</p>
 			</div>
 		</div>
 	)
