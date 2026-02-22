@@ -1,5 +1,6 @@
 import React from 'react';
 import { ApiSuccess } from '../../api/admin/api';
+import QrGenratorInPDF from '../../helpers/qrGenInPDF';
 
 type PostTicketsData = { count: number; ticket_keys: string[] };
 
@@ -9,7 +10,6 @@ interface TicketsSectionProps {
   handleCreateTickets: () => Promise<void>;
   createdTickets: ApiSuccess<PostTicketsData> | null;
   setCreatedTickets: (value: null) => void;
-  downloadQrPdf: (keys: string[]) => Promise<void>;
 }
 
 export default function TicketsSection({
@@ -18,7 +18,6 @@ export default function TicketsSection({
   handleCreateTickets,
   createdTickets,
   setCreatedTickets,
-  downloadQrPdf,
 }: TicketsSectionProps) {
   return (
     <section className="bg-dark-2 p-4 rounded-xl border border-border-dark-2">
@@ -52,7 +51,7 @@ export default function TicketsSection({
             </button>
           </div>
           <button
-            onClick={() => downloadQrPdf(createdTickets.ticket_keys)}
+            onClick={() => QrGenratorInPDF(createdTickets.ticket_keys)}
             className="w-full bg-bright text-dark font-bold py-2 px-3 rounded"
           >
             Скачать QR-коды (в PDF)

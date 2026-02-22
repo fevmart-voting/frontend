@@ -15,6 +15,7 @@ export default function StatusDropdown ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Закрываем меню при клике вне компонента
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -25,6 +26,7 @@ export default function StatusDropdown ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Преобразование статуса в текст
   const getStatusText = (status: ElectionStatus) => {
     switch (status) {
       case 'active': return 'открыто';
