@@ -1,44 +1,77 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Election, ElectionOption, VoteResultRow, ApiSuccess } from '../../api/admin/api';
 import StatusDropdown from './statusDropdown';
 
 interface ElectionItemProps {
   election: Election;
-  openResultsId: number | null;
-  openEditId: number | null;
-  editStartsAt: string;
-  editEndsAt: string;
-  setEditStartsAt: (value: string) => void;
-  setEditEndsAt: (value: string) => void;
-  handleUpdateElectionDates: (electionId: number) => Promise<void>;
-  viewResults: (electionId: number) => Promise<void>;
-  viewOptions: (electionId: number) => Promise<void>;
-  electionResults: Record<number, ApiSuccess<{ results: VoteResultRow[]; total_votes: number }>>;
-  electionOptions: Record<number, ApiSuccess<{ options: ElectionOption[] }>>;
-  handleAddOption: (electionId: number, label: string) => Promise<void>;
-  handleUpdateElectionStatus: (electionId: number, status: string) => Promise<void>;
+  fetchResults: (electionId: number) => Promise<ApiSuccess<{ results: VoteResultRow[]; total_votes: number }>>;
+  fetchOptions: (electionId: number) => Promise<ApiSuccess<{ options: ElectionOption[] }>>;
+  onAddOption: (electionId: number, label: string) => Promise<void>;
+  onUpdateStatus: (electionId: number, status: string) => Promise<void>;
+  onUpdateDates: (electionId: number, startsAt: string, endsAt: string) => Promise<void>;
 }
 
 export default function ElectionItem({
   election,
-  openResultsId,
-  openEditId,
-  editStartsAt,
-  editEndsAt,
-  setEditStartsAt,
-  setEditEndsAt,
-  handleUpdateElectionDates,
-  viewResults,
-  viewOptions,
-  electionResults,
-  electionOptions,
-  handleAddOption,
-  handleUpdateElectionStatus,
+  fetchResults,
+  fetchOptions,
+  onAddOption,
+  onUpdateStatus,
+  onUpdateDates,
 }: ElectionItemProps) {
-  // Проверяем, открыта ли панель результатов для выбранного голосования
-  const showResults = openResultsId === election.id;
-  // Проверяем, открыта ли панель редактирования для выбранного голосования
-  const showEdit = openEditId === election.id;
+
+  // Состояния для открытия панелей
+  const [isResultsOpen, setIsResultsOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  // Состояния для загруженных данных
+  const [results, setResults] = useState<ApiSuccess<{ results: VoteResultRow[]; total_votes: number }> | null>(null);
+  const [options, setOptions] = useState<ApiSuccess<{ options: ElectionOption[] }> | null>(null);
+
+  // Состояния для полей дат
+  const [editStartsAt, setEditStartsAt] = useState(
+    election.starts_at.replace(' ', 'T').slice(0, 16)
+  );
+  const [editEndsAt, setEditEndsAt] = useState(
+    election.ends_at.replace(' ', 'T').slice(0, 16)
+  );
+
+  const handleResultsClick = async () => {
+    if (!isResultsOpen && !results) {
+      const data = await fetchResults(election.id);
+      if (data.success) {
+        setResults(data);
+      } else {
+        alert(`Error`);
+        return;
+      }
+    }
+    setIsResultsOpen(!isResultsOpen);
+  };
+
+  const handleEditClick = async () => {
+    if (!isEditOpen && !options) {
+      const data = await fetchOptions(election.id);
+      if (data.success) {
+        setOptions(data);
+      } else {
+        alert(`Error`);
+        return;
+      }
+    }
+    setIsEditOpen(!isEditOpen);
+  };
+
+  const handleSaveDates = async () => {
+    await onUpdateDates(election.id, editStartsAt, editEndsAt);
+    setIsEditOpen(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditOpen(false);
+    setEditStartsAt(election.starts_at.replace(' ', 'T').slice(0, 16));
+    setEditEndsAt(election.ends_at.replace(' ', 'T').slice(0, 16));
+  };
 
   return (
     <div className="bg-dark p-3 rounded border border-border-dark-2">
@@ -48,41 +81,39 @@ export default function ElectionItem({
           electionId={election.id}
           currentStatus={election.status}
           isOpen={election.is_open}
-          onStatusChange={handleUpdateElectionStatus}
+          onStatusChange={onUpdateStatus}
         />
       </div>
 
       <div className="flex gap-2 mt-2">
         <button
-          onClick={() => viewResults(election.id)}
+          onClick={handleResultsClick}
           className="text-xs bg-bright-01 px-2 py-1 rounded"
         >
           результаты
         </button>
         <button
-          onClick={() => viewOptions(election.id)}
+          onClick={handleEditClick}
           className="text-xs bg-bright-01 px-2 py-1 rounded"
         >
           редактировать
         </button>
       </div>
 
-      {showResults && electionResults[election.id] && (
+      {isResultsOpen && results && (
         <div className="mt-2 text-sm border-t border-bright-01 pt-2">
           <strong>Результаты:</strong>
-          {electionResults[election.id].results.map((r: VoteResultRow) => (
+          {results.results.map((r) => (
             <div key={r.option_id} className="flex justify-between">
               <span>{r.label}</span>
               <span>{r.votes} ({r.percent.toFixed(1)}%)</span>
             </div>
           ))}
-          <p className="text-right text-bright-01">
-            Всего: {electionResults[election.id].total_votes}
-          </p>
+          <p className="text-right text-bright-01">Всего: {results.total_votes}</p>
         </div>
       )}
 
-      {showEdit && electionOptions[election.id] && (
+      {isEditOpen && options && (
         <div className="mt-2 text-sm border-t border-bright-01 pt-2">
           <div className="mb-2">
             <strong>Изменить даты:</strong>
@@ -102,10 +133,16 @@ export default function ElectionItem({
               />
               <div className="flex gap-1 mt-1">
                 <button
-                  onClick={() => handleUpdateElectionDates(election.id)}
+                  onClick={handleSaveDates}
                   className="text-xs bg-secondary text-dark px-2 py-1 rounded"
                 >
                   Сохранить
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  className="text-xs bg-bright-01 px-2 py-1 rounded"
+                >
+                  Отмена
                 </button>
               </div>
             </div>
@@ -114,7 +151,7 @@ export default function ElectionItem({
           <div>
             <strong>Варианты:</strong>
             <ul className="list-disc list-inside">
-              {electionOptions[election.id].options.map((opt: ElectionOption) => (
+              {options.options.map((opt) => (
                 <li key={opt.id}>{opt.label}</li>
               ))}
             </ul>
@@ -128,7 +165,7 @@ export default function ElectionItem({
               <button
                 onClick={() => {
                   const input = document.getElementById(`opt-${election.id}`) as HTMLInputElement;
-                  handleAddOption(election.id, input.value);
+                  onAddOption(election.id, input.value);
                   input.value = '';
                 }}
                 className="bg-secondary text-dark px-3 py-1 text-sm rounded"

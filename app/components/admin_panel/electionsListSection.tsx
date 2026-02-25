@@ -4,39 +4,21 @@ import ElectionItem from './electionItem';
 
 interface ElectionsListSectionProps {
   elections: ApiSuccess<{ elections: Election[] }> | null;
-  openResultsId: number | null;
-  openEditId: number | null;
-  editStartsAt: string;
-  editEndsAt: string;
-  setEditStartsAt: (value: string) => void;
-  setEditEndsAt: (value: string) => void;
-  handleUpdateElectionDates: (electionId: number) => Promise<void>;
-  viewResults: (electionId: number) => Promise<void>;
-  viewOptions: (electionId: number) => Promise<void>;
-  electionResults: Record<number, ApiSuccess<{ results: any[]; total_votes: number }>>;
-  electionOptions: Record<number, ApiSuccess<{ options: any[] }>>;
-  handleAddOption: (electionId: number, label: string) => Promise<void>;
-  handleUpdateElectionStatus: (electionId: number, status: string) => Promise<void>;
+  fetchResults: (electionId: number) => Promise<any>;
+  fetchOptions: (electionId: number) => Promise<any>;
+  onAddOption: (electionId: number, label: string) => Promise<void>;
+  onUpdateStatus: (electionId: number, status: string) => Promise<void>;
+  onUpdateDates: (electionId: number, startsAt: string, endsAt: string) => Promise<void>;
 }
 
-export default function ElectionsListSection(props: ElectionsListSectionProps) {
-  const {
-    elections,
-    openResultsId,
-    openEditId,
-    editStartsAt,
-    editEndsAt,
-    setEditStartsAt,
-    setEditEndsAt,
-    handleUpdateElectionDates,
-    viewResults,
-    viewOptions,
-    electionResults,
-    electionOptions,
-    handleAddOption,
-    handleUpdateElectionStatus,
-  } = props;
-
+export default function ElectionsListSection({
+  elections,
+  fetchResults,
+  fetchOptions,
+  onAddOption,
+  onUpdateStatus,
+  onUpdateDates,
+}: ElectionsListSectionProps) {
   if (!elections) {
     return (
       <section className="bg-dark-2 p-4 rounded-xl border border-border-dark-2">
@@ -54,19 +36,11 @@ export default function ElectionsListSection(props: ElectionsListSectionProps) {
           <ElectionItem
             key={el.id}
             election={el}
-            openResultsId={openResultsId}
-            openEditId={openEditId}
-            editStartsAt={editStartsAt}
-            editEndsAt={editEndsAt}
-            setEditStartsAt={setEditStartsAt}
-            setEditEndsAt={setEditEndsAt}
-            handleUpdateElectionDates={handleUpdateElectionDates}
-            viewResults={viewResults}
-            viewOptions={viewOptions}
-            electionResults={electionResults}
-            electionOptions={electionOptions}
-            handleAddOption={handleAddOption}
-            handleUpdateElectionStatus={handleUpdateElectionStatus}
+            fetchResults={fetchResults}
+            fetchOptions={fetchOptions}
+            onAddOption={onAddOption}
+            onUpdateStatus={onUpdateStatus}
+            onUpdateDates={onUpdateDates}
           />
         ))}
       </div>

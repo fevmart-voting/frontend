@@ -1,26 +1,41 @@
-import React from 'react';
+'use client';
 
-interface NewElection {
-  title: string;
-  description: string;
-  starts_at: string;
-  ends_at: string;
-  options: string[];
-}
+import React, { useState } from 'react';
 
 interface CreateElectionSectionProps {
-  newElection: NewElection;
-  setNewElection: React.Dispatch<React.SetStateAction<NewElection>>;
-  handleCreateElection: () => Promise<void>;
-  removeOptionField: (index: number) => void;
+  handleCreateElection: (
+    data: {
+      title: string;
+      description: string;
+      starts_at: string;
+      ends_at: string;
+      options: string[];
+    }
+  ) => Promise<void>;
 }
 
-export default function CreateElectionSection({
-  newElection,
-  setNewElection,
-  handleCreateElection,
-  removeOptionField,
-}: CreateElectionSectionProps) {
+export default function CreateElectionSection({ handleCreateElection }: CreateElectionSectionProps) {
+  const [newElection, setNewElection] = useState({
+    title: '',
+    description: '',
+    starts_at: '',
+    ends_at: '',
+    options: [''],
+  });
+
+  const removeOptionField = (index: number) => {
+    if (newElection.options.length > 1) {
+      setNewElection({
+        ...newElection,
+        options: newElection.options.filter((_, i) => i !== index),
+      });
+    }
+  };
+
+  const onSubmit = async () => {
+    await handleCreateElection(newElection);
+  };
+
   return (
     <section className="bg-dark-2 p-4 rounded-xl border border-border-dark-2">
       <h2 className="text-xl font-semibold mb-2">Новое голосование</h2>
@@ -96,7 +111,7 @@ export default function CreateElectionSection({
         </div>
 
         <button
-          onClick={handleCreateElection}
+          onClick={onSubmit}
           className="w-full bg-secondary text-dark font-bold py-2 px-3 rounded"
         >
           Создать голосование

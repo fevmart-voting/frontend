@@ -1,24 +1,30 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { ApiSuccess } from '../../api/admin/api';
 import QrGenratorInPDF from '../../helpers/qrGenInPDF';
+
 
 type PostTicketsData = { count: number; ticket_keys: string[] };
 
 interface TicketsSectionProps {
-  ticketCount: number;
-  setTicketCount: (value: number) => void;
-  handleCreateTickets: () => Promise<void>;
-  createdTickets: ApiSuccess<PostTicketsData> | null;
-  setCreatedTickets: (value: null) => void;
+  handleCreateTickets: (count: number) => Promise<ApiSuccess<PostTicketsData> | { success: false; error: string }>;
 }
 
-export default function TicketsSection({
-  ticketCount,
-  setTicketCount,
-  handleCreateTickets,
-  createdTickets,
-  setCreatedTickets,
-}: TicketsSectionProps) {
+
+export default function TicketsSection({ handleCreateTickets }: TicketsSectionProps) {
+  const [ticketCount, setTicketCount] = useState(100);
+  const [createdTickets, setCreatedTickets] = useState<ApiSuccess<PostTicketsData> | null>(null);
+
+  const onCreateClick = async () => {
+    const result = await handleCreateTickets(ticketCount);
+    if (result.success) {
+      setCreatedTickets(result);
+    } else {
+      alert(`Error: ${result.error}`);
+    }
+  };
+
   return (
     <section className="bg-dark-2 p-4 rounded-xl border border-border-dark-2">
       <h2 className="text-xl font-semibold mb-2">Тикеты</h2>
@@ -31,7 +37,7 @@ export default function TicketsSection({
           className="w-full px-2 py-1 rounded bg-dark border border-border-bright-01 text-text-bright"
         />
         <button
-          onClick={handleCreateTickets}
+          onClick={onCreateClick}
           className="w-full bg-secondary text-dark font-bold py-2 px-3 rounded"
         >
           Создать тикеты
@@ -54,7 +60,7 @@ export default function TicketsSection({
             onClick={() => QrGenratorInPDF(createdTickets.ticket_keys)}
             className="w-full bg-bright text-dark font-bold py-2 px-3 rounded"
           >
-            Скачать QR-коды (в PDF)
+            Скачать QR-коды (PDF)
           </button>
         </div>
       )}

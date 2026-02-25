@@ -6,11 +6,10 @@ import {
   ApiSuccess,
   CreateElectionRequest,
   UpdateElectionRequest,
-  VoteResultRow,
-  ElectionOption,
   Election,
   ElectionStatus,
   DEFAULT_API_BASE_URL,
+  ApiError,
 } from '../api/admin/api';
 import StatsSection from '../components/admin_panel/statsSection';
 import TicketsSection from '../components/admin_panel/ticketsSection';
@@ -30,13 +29,6 @@ type PostTicketsData = {
 type GetElectionsData = {
   elections: Election[];
 };
-type GetElectionResultData = {
-  results: VoteResultRow[];
-  total_votes: number;
-};
-type GetElectionOptionsData = {
-  options: ElectionOption[];
-};
 
 export default function AdminPanel() {
 
@@ -46,34 +38,8 @@ export default function AdminPanel() {
     fetchImpl: fetch.bind(globalThis),
   }), []);
 
-  // Статистика
   const [stats, setStats] = useState<ApiSuccess<GetStatsData> | null>(null);
-
-  // Тикеты
-  const [ticketCount, setTicketCount] = useState(100);
-  const [createdTickets, setCreatedTickets] = useState<ApiSuccess<PostTicketsData> | null>(null);
-
-  // Создание нового голосвания
-  const [newElection, setNewElection] = useState({
-    title: '',
-    description: '',
-    starts_at: '',
-    ends_at: '',
-    options: [''],
-  });
-
-  // Список голосваний и редактирование выбранного голосования
   const [elections, setElections] = useState<ApiSuccess<GetElectionsData> | null>(null);
-  const [editElectionResults, setEditElectionResults] = useState<Record<number, ApiSuccess<GetElectionResultData>>>({});
-  const [editElectionOptions, setEditElectionOptions] = useState<Record<number, ApiSuccess<GetElectionOptionsData>>>({});
-  
-  // Два независимых состояния : редактирование и просмотр результатов
-  const [openResultsId, setOpenResultsId] = useState<number | null>(null);
-  const [openEditId, setOpenEditId] = useState<number | null>(null);
-
-  // Даты начала и конца проведения (для редактирования)
-  const [editElectioStartsAt, setEditElectioStartsAt] = useState('');
-  const [editElectioEndsAt, setEditElectioEndsAt] = useState('');
 
   useEffect(() => {
     refreshStats();
@@ -90,22 +56,26 @@ export default function AdminPanel() {
     if (data.success) setElections(data);
   };
 
-  const handleCreateTickets = async () => {
-    const res = await adminApi.createTickets(ticketCount);
+  const handleCreateTickets = async (count: number): Promise<ApiSuccess<PostTicketsData> | ApiError> => {
+    const res = await adminApi.createTickets(count);
     if (res.success) {
-      setCreatedTickets(res);
-      refreshStats();
-    } else {
-      alert(`Error: ${res.error}`);
+      await refreshStats();
     }
+    return res;
   };
 
-  const handleCreateElection = async () => {
-    if (!newElection.title || !newElection.starts_at || !newElection.ends_at) {
+  const handleCreateElection = async (formData: {
+    title: string;
+    description: string;
+    starts_at: string;
+    ends_at: string;
+    options: string[];
+  }) => {
+    if (!formData.title || !formData.starts_at || !formData.ends_at) {
       alert('Заполните название и даты!');
       return;
     }
-    const notEmptyOptions = newElection.options
+    const notEmptyOptions = formData.options
       .filter((option) => option.trim() !== '')
       .map((option) => ({ label: option.trim() }));
     if (notEmptyOptions.length === 0) {
@@ -113,128 +83,76 @@ export default function AdminPanel() {
       return;
     }
     const formatDate = (dateStr: string) => dateStr.replace('T', ' ') + ':00';
-  
     const body: CreateElectionRequest = {
-      title: newElection.title,
-      description: newElection.description,
-      starts_at: formatDate(newElection.starts_at),
-      ends_at: formatDate(newElection.ends_at),
+      title: formData.title,
+      description: formData.description,
+      starts_at: formatDate(formData.starts_at),
+      ends_at: formatDate(formData.ends_at),
       options: notEmptyOptions,
       status: "scheduled",
     };
     const res = await adminApi.createElection(body);
-
     if (res.success) {
       alert(`Голосование создано, ID = ${res.election_id}`);
-      setNewElection({ title: '', description: '', starts_at: '', ends_at: '', options: [''] });
-      refreshElections();
+      await refreshElections();
     } else {
       alert(`Error: ${res.error}`);
     }
   };
 
-  const removeOptionFromNewElectionForm = (index: number) => {
-    if (newElection.options.length > 1) {
-      setNewElection({
-        ...newElection,
-        options: newElection.options.filter((_, i) => i !== index),
-      });
-    }
+  const fetchResults = async (electionId: number) => {
+    return await adminApi.getResults(electionId);
   };
 
-  // Режим просмотра результатов
-  const viewEletionResults = async (electionId: number) => {
-    if (openResultsId === electionId) {
-      setOpenResultsId(null);
-      return;
-    }
-    if (!editElectionResults[electionId]) {
-      const res = await adminApi.getResults(electionId);
-      if (res.success) {
-        setEditElectionResults((prev) => ({ ...prev, [electionId]: res }));
-      } else {
-        alert(`Error: ${res.error}`);
-        return;
-      }
-    }
-    setOpenResultsId(electionId);
-  };
-
-  // Режим редактирования
-  const viewEletionOptions = async (electionId: number) => {
-    if (openEditId === electionId) {
-      setOpenEditId(null);
-      return;
-    }
-    if (!editElectionOptions[electionId]) {
-      const res = await adminApi.getOptions(electionId);
-      if (res.success) {
-        setEditElectionOptions((prev) => ({ ...prev, [electionId]: res }));
-      } else {
-        alert(`Error: ${res.error}`);
-        return;
-      }
-    }
-    const election = elections?.elections.find(e => e.id === electionId);
-    if (election) {
-      const starts = election.starts_at.replace(' ', 'T').slice(0, 16);
-      const ends = election.ends_at.replace(' ', 'T').slice(0, 16);
-      setEditElectioStartsAt(starts);
-      setEditElectioEndsAt(ends);
-    }
-    setOpenEditId(electionId);
+  const fetchOptions = async (electionId: number) => {
+    return await adminApi.getOptions(electionId);
   };
 
   const handleAddOption = async (electionId: number, label: string) => {
     if (!label.trim()) return;
     const res = await adminApi.createOptions(electionId, { label });
     if (res.success) {
-      refreshElections();
+      await refreshElections();
       alert('Вариант добавлен');
-      const optRes = await adminApi.getOptions(electionId);
-      if (optRes.success) {
-        setEditElectionOptions((prev) => ({ ...prev, [electionId]: optRes }));
-      }
     } else {
       alert(`Error: ${res.error}`);
     }
   };
 
-  const handleUpdateElectionDates = async (electionId: number) => {
-    if (!editElectioStartsAt || !editElectioEndsAt) return;
-    const election = elections?.elections.find(e => e.id === electionId);
-    if (!election) return;
-    const formatDate = (dateStr: string) => dateStr.replace('T', ' ') + ':00';
-    const body: UpdateElectionRequest = {
-      title: election.title,
-      starts_at: formatDate(editElectioStartsAt),
-      ends_at: formatDate(editElectioEndsAt),
-      status: election.status,
-      description: election.description,
-    };
-    const res = await adminApi.updateElection(electionId, body);
-    if (res.success) {
-      alert('Время проведения голосования обновлено');
-      refreshElections();
-    } else {
-      alert(`Error: ${res.error}`);
-    }
-  };
-
-  const handleUpdateElectionStatus = async (electionId: number, newElectionStatus: ElectionStatus) => {
+  const handleUpdateElectionStatus = async (electionId: number, newStatus: ElectionStatus) => {
     const election = elections?.elections.find(e => e.id === electionId);
     if (!election) return;
     const body: UpdateElectionRequest = {
       title: election.title,
       starts_at: election.starts_at,
       ends_at: election.ends_at,
-      status: newElectionStatus,
+      status: newStatus,
       description: election.description,
     };
     const res = await adminApi.updateElection(electionId, body);
     if (res.success) {
       alert('Статус голосования обновлен');
-      refreshElections();
+      await refreshElections();
+    } else {
+      alert(`Error: ${res.error}`);
+    }
+  };
+
+  const handleUpdateElectionDates = async (electionId: number, startsAt: string, endsAt: string) => {
+    const election = elections?.elections.find(e => e.id === electionId);
+    if (!election) return;
+    const formatDate = (dateStr: string) => dateStr.replace('T', ' ') + ':00';
+    const body: UpdateElectionRequest = {
+      title: election.title,
+      starts_at: formatDate(startsAt),
+      ends_at: formatDate(endsAt),
+      status: election.status,
+      description: election.description,
+    };
+    const res = await adminApi.updateElection(electionId, body);
+    if (res.success) {
+      alert('Время проведения голосования обновлено');
+      await refreshElections();
     } else {
       alert(`Error: ${res.error}`);
     }
@@ -247,36 +165,17 @@ export default function AdminPanel() {
 
         <StatsSection stats={stats} />
 
-        <TicketsSection
-          ticketCount={ticketCount}
-          setTicketCount={setTicketCount}
-          handleCreateTickets={handleCreateTickets}
-          createdTickets={createdTickets}
-          setCreatedTickets={setCreatedTickets}
-        />
+        <TicketsSection handleCreateTickets={handleCreateTickets}/>
 
-        <CreateElectionSection
-          newElection={newElection}
-          setNewElection={setNewElection}
-          handleCreateElection={handleCreateElection}
-          removeOptionField={removeOptionFromNewElectionForm}
-        />
+        <CreateElectionSection handleCreateElection={handleCreateElection}/>
 
         <ElectionsListSection
           elections={elections}
-          openResultsId={openResultsId}
-          openEditId={openEditId}
-          editStartsAt={editElectioStartsAt}
-          editEndsAt={editElectioEndsAt}
-          setEditStartsAt={setEditElectioStartsAt}
-          setEditEndsAt={setEditElectioEndsAt}
-          handleUpdateElectionDates={handleUpdateElectionDates}
-          viewResults={viewEletionResults}
-          viewOptions={viewEletionOptions}
-          electionResults={editElectionResults}
-          electionOptions={editElectionOptions}
-          handleAddOption={handleAddOption}
-          handleUpdateElectionStatus={handleUpdateElectionStatus}
+          fetchResults={fetchResults}
+          fetchOptions={fetchOptions}
+          onAddOption={handleAddOption}
+          onUpdateStatus={handleUpdateElectionStatus}
+          onUpdateDates={handleUpdateElectionDates}
         />
       </div>
     </div>
