@@ -15,12 +15,12 @@ interface StatsSectionProps {
 export default function StatsSection({ stats }: StatsSectionProps) {
   return (
     <section className="bg-dark-2 p-4 rounded-xl border border-border-dark-2">
-      <h2 className="text-xl font-semibold mb-2">Статистика</h2>
+      <h2 className="text-3xl font-semibold mb-4">Статистика</h2>
       {stats ? (
-        <div className="grid grid-cols-1 gap-2 text-center">
+        <div className="grid grid-cols-1 gap-2 text-center text-2.5xl">
           <div className="bg-bright-01 p-2 rounded">Всего тикетов: {stats.total_tickets}</div>
           <div className="bg-bright-01 p-2 rounded">Использованые тикеты: {stats.redeemed_tickets}</div>
-          <div className="bg-bright-01 p-2 rounded">Голосоющих: {stats.voters}</div>
+          <div className="bg-bright-01 p-2 rounded">Голосующих: {stats.voters}</div>
           <div className="bg-bright-01 p-2 rounded">Голосов: {stats.votes}</div>
         </div>
       ) : (

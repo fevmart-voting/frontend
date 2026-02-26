@@ -1,24 +1,22 @@
 import React from 'react';
 import { Election, ApiSuccess } from '../../api/admin/api';
 import ElectionItem from './electionItem';
+import { VoteApiClient } from '../../api/admin/api';
+import { AdminApiHandlers } from '@/app/admin_panel/page';
 
 interface ElectionsListSectionProps {
   elections: ApiSuccess<{ elections: Election[] }> | null;
-  fetchResults: (electionId: number) => Promise<any>;
-  fetchOptions: (electionId: number) => Promise<any>;
-  onAddOption: (electionId: number, label: string) => Promise<void>;
-  onUpdateStatus: (electionId: number, status: string) => Promise<void>;
-  onUpdateDates: (electionId: number, startsAt: string, endsAt: string) => Promise<void>;
+  handlers: AdminApiHandlers
+  adminApi: VoteApiClient
 }
 
 export default function ElectionsListSection({
   elections,
-  fetchResults,
-  fetchOptions,
-  onAddOption,
-  onUpdateStatus,
-  onUpdateDates,
+  adminApi,
+  handlers
 }: ElectionsListSectionProps) {
+
+
   if (!elections) {
     return (
       <section className="bg-dark-2 p-4 rounded-xl border border-border-dark-2">
@@ -29,21 +27,18 @@ export default function ElectionsListSection({
   }
 
   return (
-    <section className="bg-dark-2 p-4 rounded-xl border border-border-dark-2">
-      <h2 className="text-xl font-semibold mb-2">Текущие голосования</h2>
-      <div className="space-y-3">
-        {elections.elections.map((el) => (
-          <ElectionItem
-            key={el.id}
-            election={el}
-            fetchResults={fetchResults}
-            fetchOptions={fetchOptions}
-            onAddOption={onAddOption}
-            onUpdateStatus={onUpdateStatus}
-            onUpdateDates={onUpdateDates}
-          />
-        ))}
-      </div>
-    </section>
-  );
+		<section className="bg-dark-2 p-4 rounded-xl border border-border-dark-2">
+			<h2 className="text-xl font-semibold mb-2">Текущие голосования</h2>
+			<div className="space-y-3">
+				{elections.elections.map(el => (
+					<ElectionItem
+						key={el.id}
+						election={el}
+            handlers={handlers}
+						adminApi={adminApi}
+					/>
+				))}
+			</div>
+		</section>
+	)
 }

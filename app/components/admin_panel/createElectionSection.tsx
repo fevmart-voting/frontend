@@ -1,20 +1,13 @@
 'use client';
 
+import { AdminApiHandlers } from '@/app/admin_panel/page';
 import React, { useState } from 'react';
 
 interface CreateElectionSectionProps {
-  handleCreateElection: (
-    data: {
-      title: string;
-      description: string;
-      starts_at: string;
-      ends_at: string;
-      options: string[];
-    }
-  ) => Promise<void>;
+  handlers: AdminApiHandlers
 }
 
-export default function CreateElectionSection({ handleCreateElection }: CreateElectionSectionProps) {
+export default function CreateElectionSection({ handlers:{handleCreateElection, ...handlers} }: CreateElectionSectionProps) {
   const [newElection, setNewElection] = useState({
     title: '',
     description: '',

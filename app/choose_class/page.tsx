@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Table from '../components/table'
 import Button from '../components/button'
+import dynamic from 'next/dynamic'
+
+const Table = dynamic(() => import('../components/table'), { ssr: false })
 
 interface optionContent {
 	cl: string
