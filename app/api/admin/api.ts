@@ -58,7 +58,7 @@ export interface VoteRequest {
   option_id: number;
 }
 
-export type CreateElectionOptionInput = string | { label: string };
+export type CreateElectionOptionInput = string;
 
 export interface CreateElectionRequest {
   title: string;
@@ -98,10 +98,13 @@ export class VoteApiClient {
   private readonly adminKey?: string;
   private readonly fetchImpl: typeof fetch;
 
+
   constructor(options: VoteApiClientOptions = {}) {
     this.baseUrl = (options.baseUrl ?? DEFAULT_API_BASE_URL).replace(/\/+$/, "");
     this.adminKey = options.adminKey;
     this.fetchImpl = options.fetchImpl ?? fetch;
+
+
   }
 
   /**
