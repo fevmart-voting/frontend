@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { VoteApiClient, ApiSuccess, CreateElectionRequest, UpdateElectionRequest, Election, ElectionStatus, DEFAULT_API_BASE_URL, ApiError, ApiResult } from '../api/admin/api'
-import StatsSection from '../components/admin_panel/statsSection'
-import TicketsSection from '../components/admin_panel/ticketsSection'
-import CreateElectionSection from '../components/admin_panel/createElectionSection'
-import ElectionsListSection from '../components/admin_panel/electionsListSection'
+import { VoteApiClient, ApiSuccess, CreateElectionRequest, UpdateElectionRequest, Election, ElectionStatus, DEFAULT_API_BASE_URL, ApiError, ApiResult } from '../../api/admin/api'
+import StatsSection from '../../components/admin_panel/statsSection'
+import TicketsSection from '../../components/admin_panel/ticketsSection'
+import CreateElectionSection from '../../components/admin_panel/createElectionSection'
+import ElectionsListSection from '../../components/admin_panel/electionsListSection'
+import { useParams } from 'next/navigation'
 
 type GetStatsData = {
 	total_tickets: number
@@ -30,15 +31,14 @@ export interface AdminApiHandlers {
 }
 
 export default function AdminPanel() {
-	const adminApi = useMemo(
-		() =>
-			new VoteApiClient({
-				baseUrl: DEFAULT_API_BASE_URL,
-				adminKey: process.env.NEXT_PUBLIC_ADMIN_KEY,
-				fetchImpl: fetch.bind(globalThis),
-			}),
-		[],
-	)
+	const URLparams = useParams<{ key: string }>()
+	const adminKey = URLparams.key
+
+	const adminApi = new VoteApiClient({
+		baseUrl: DEFAULT_API_BASE_URL,
+		adminKey: adminKey,
+		fetchImpl: fetch.bind(globalThis),
+	})
 
 	const [stats, setStats] = useState<ApiSuccess<GetStatsData> | null>(null)
 	const [elections, setElections] = useState<ApiSuccess<GetElectionsData> | null>(null)
@@ -60,7 +60,7 @@ export default function AdminPanel() {
 		refreshElections()
 	}, [])
 
-	const handlers:AdminApiHandlers = {
+	const handlers: AdminApiHandlers = {
 		handleUpdateElectionDates: async (electionId: number, startsAt: string, endsAt: string) => {
 			const election = elections?.elections.find(e => e.id === electionId)
 			if (!election) return

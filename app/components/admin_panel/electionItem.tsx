@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Election, ElectionOption, VoteResultRow, ApiSuccess, VoteApiClient } from '../../api/admin/api'
-import { AdminApiHandlers } from '@/app/admin_panel/page'
+import { AdminApiHandlers } from '@/app/admin/[key]/page'
 
 import dynamic from 'next/dynamic'
 
@@ -9,7 +9,7 @@ const StatusDropdown = dynamic(() => import('./statusDropdown'), { ssr: false })
 interface ElectionItemProps {
 	election: Election
 	adminApi: VoteApiClient
-  handlers: AdminApiHandlers
+	handlers: AdminApiHandlers
 }
 
 export default function ElectionItem({ election, handlers, adminApi }: ElectionItemProps) {

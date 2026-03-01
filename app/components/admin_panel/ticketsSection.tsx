@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { ApiSuccess } from '../../api/admin/api'
 import QrGenratorInPDF from '../../helpers/qrGenInPDF'
-import { AdminApiHandlers } from '@/app/admin_panel/page'
+import { AdminApiHandlers } from '@/app/admin/[key]/page'
 
 type PostTicketsData = { count: number; ticket_keys: string[] }
 
