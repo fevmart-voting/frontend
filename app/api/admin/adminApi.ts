@@ -7,7 +7,7 @@ export interface VoteApiAdminOptions extends VoteApiClientOptions {
 	fetchImpl?: typeof fetch
 }
 
-export type CreateElectionOptionInput = string
+export type CreateElectionOptionInput = {label:string}
 
 export interface CreateElectionRequest {
   title: string

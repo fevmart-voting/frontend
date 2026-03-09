@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { VoteApiClient, ApiSuccess, CreateElectionRequest, UpdateElectionRequest, Election, ElectionStatus, DEFAULT_API_BASE_URL, ApiError } from '../api/api'
+import { VoteApiClient, ApiSuccess, Election, ElectionStatus, DEFAULT_API_BASE_URL, ApiError } from '../api/api'
+import { CreateElectionRequest, UpdateElectionRequest, VoteApiAdmin} from '../api/admin/adminApi'
 import StatsSection from '../components/admin_panel/statsSection'
 import TicketsSection from '../components/admin_panel/ticketsSection'
 import CreateElectionSection from '../components/admin_panel/createElectionSection'
@@ -24,7 +25,7 @@ type GetElectionsData = {
 export default function AdminPanel() {
 	const adminApi = useMemo(
 		() =>
-			new VoteApiClient({
+			new VoteApiAdmin({
 				baseUrl: DEFAULT_API_BASE_URL,
 				adminKey: process.env.NEXT_PUBLIC_ADMIN_KEY,
 				fetchImpl: fetch.bind(globalThis),
