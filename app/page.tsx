@@ -52,26 +52,21 @@ export default function Home() {
 	}, []);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { sortedData, q, d } = useMemo(() => {
-		const rawData = selectedTopic === 'miss' ? missData : classData
-		const sorted = [...rawData].sort((a, b) => b.votes - a.votes)
+	const { sortedData, maxVotes } = useMemo(() => {
+		const rawData = selectedTopic === 'miss' ? missData : classData;
+		const sorted = [...rawData].sort((a, b) => b.votes - a.votes);
+		const maxVotes = sorted.length > 0 ? sorted[0].votes : 0;
 
-		const qVal = sorted.length > 0 ? sorted[sorted.length - 1].votes : 0
-		const wVal = sorted.length > 0 ? sorted[0].votes : 0
-		const dVal = wVal - qVal
-
-		return { sortedData: sorted, q: qVal, d: dVal }
-	}, [selectedTopic, missData, classData])
+		return { sortedData: sorted, maxVotes };
+	}, [selectedTopic, missData, classData]);
 
 	const calculateWidth = (votes: number) => {
 		return (votes / sortedData[0]?.votes) * 100 // get percentage of max width
 	}
 
-	const winnerTitle = sortedData[0]?.title
-
 	const chart = sortedData.map(({ title, votes }: DataEntry) => {
-		const width = calculateWidth(votes)
-		const isWinner = title === winnerTitle
+		const width = calculateWidth(votes);
+		const isWinner = votes === maxVotes;
 
 		return (
 			<div

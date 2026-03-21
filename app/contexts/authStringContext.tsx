@@ -10,7 +10,6 @@ type UserKeyContextType = {
   clearAuthKey: () => void;
 };
 
-
 const AuthKeyContext = createContext<UserKeyContextType | undefined>(undefined);
 
 export function AuthKeyProvider({ children }: { children: React.ReactNode }) {

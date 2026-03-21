@@ -5,14 +5,8 @@ import Table from '../components/table'
 import Button from '../components/button'
 import { useAuthKey } from '../contexts/authStringContext';
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
 import { castVote } from '../api/voteApi'
-
-
-interface optionContent {
-	cl: string
-	name: string
-}
+import { chooseMissOptions, optionContent } from '../config/options'
 
 
 export default function ChooseMiss() {
@@ -26,31 +20,7 @@ export default function ChooseMiss() {
 		setSelectedIndex(selectedIndex === index ? null : index)
 	}
 
-	const optionsData: optionContent[] = [
-		{
-			cl: '10A',
-			name: 'Марочкин Т.',
-		},
-		{
-			cl: '10Б',
-			name: 'Марочкин Т.',
-		},
-		{
-			cl: '10В',
-			name: 'Марочкин Т.',
-		},
-		{
-			cl: '10Г',
-			name: 'Марочкин Т.',
-		},
-		{
-			cl: '10Д',
-			name: 'Марочкин Т.',
-		},
-	]
-
-	const handleFormSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const handleFormSubmit = async () => {
 		if (!authKey) {
 			return;
 		}
@@ -66,7 +36,7 @@ export default function ChooseMiss() {
 		}
 	};
 
-	const options = optionsData.map(({ cl, name }: optionContent, index) => {
+	const options = chooseMissOptions.map(({ cl, name }: optionContent, index) => {
 		return (
 			<div
 				className={`grid grid-cols-[6.5rem_1fr_auto] items-center w-full`}
@@ -99,7 +69,7 @@ export default function ChooseMiss() {
 				</div>
 
 				<div className="absolute -bottom-20 left-0 w-full px-[max(4vw,4rem)]">
-					<Button onClick={(e) => handleFormSubmit(e)}>Продолжить</Button>
+					<Button onClick={handleFormSubmit}>Продолжить</Button>
 				</div>
 			</div>
 		</div>

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import QrGenratorInPDF from '../helpers/qrGenInPDF'
+import QrGenratorInPDF from '../helpers/genQrInPDF'
 
 
 export default function GenQRPage () {
