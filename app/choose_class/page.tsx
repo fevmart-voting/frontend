@@ -7,6 +7,7 @@ import { useAuthKey } from '../contexts/authStringContext';
 import { useRouter } from 'next/navigation';
 import { castVote } from '../api/voteApi'
 import { chooseClassOptions, optionContent } from '../config/options'
+import { toast } from "react-toastify";
 
 
 export default function ChooseClass() {
@@ -20,19 +21,25 @@ export default function ChooseClass() {
 		setSelectedIndex(selectedIndex === index ? null : index)
 	}
 
-	const handleFormSubmit = async () => {
-		if (!authKey) {
+	const handleSubmit = async () => {
+		if (selectedOption === null) {
+			toast.error("Вы не выбрали вариант!");
 			return;
 		}
-		if (selectedOption === null) {
-			console.warn('Не выбран вариант');
+		if (!authKey) {
+			toast.error("Вы перейшли не по QR коду, либо он уже использован!");
 			return;
 		}
 		try {
 			const res = await castVote(authKey, 'best-class', selectedOption);
-			router.push('/choose_miss');
+			if (res.ok) {
+				router.push('/choose_miss');
+			} else {
+				toast.error("Попробуйте ещё раз или обновите старницу!");
+			}
 		} catch (err) {
-			console.log(err);
+			toast.error("Попробуйте ещё раз или обновите старницу!");
+			return
 		}
 	};
 
@@ -69,7 +76,7 @@ export default function ChooseClass() {
 				</div>
 
 				<div className="absolute -bottom-20 left-0 w-full px-[max(4vw,4rem)]">
-					<Button onClick={handleFormSubmit}>Продолжить</Button>
+					<Button onClick={handleSubmit}>Продолжить</Button>
 				</div>
 			</div>
 		</div>

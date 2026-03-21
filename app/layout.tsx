@@ -3,6 +3,7 @@ import './styles/globals.css'
 import Logo from '@/app/icons/logo.svg'
 import { Montserrat, Unbounded } from 'next/font/google'
 import { AuthKeyProvider } from './contexts/authStringContext'
+import { ToastContext } from './contexts/toastContext'
 
 const montserrat = Montserrat({
 	subsets: ['cyrillic', 'cyrillic-ext'],
@@ -32,6 +33,7 @@ export default function RootLayout({
 					<Logo className="w-fit" />
 				</div>
 				{children}
+				<ToastContext/>
 				</AuthKeyProvider>
 			</body>
 		</html>

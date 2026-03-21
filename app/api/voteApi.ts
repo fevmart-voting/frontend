@@ -3,7 +3,7 @@ const DEFAULT_API_BASE_URL = process.env.NEXT_PUBLIC_BACK_URL ?? 'http://localho
 
 export async function castVote(auth: string, election: string, option: number) {
   try {
-    const res = await fetch(`${DEFAULT_API_BASE_URL}/vote`, {
+    const response = await fetch(`${DEFAULT_API_BASE_URL}/vote`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -12,13 +12,11 @@ export async function castVote(auth: string, election: string, option: number) {
         authString: auth,
       }),
     });
-
-    const data = await res.json();
-    console.log(data);
-    return data;
+    const data = await response.json();
+    return { ok: response.ok, data };
   } catch (error) {
-    console.log(error)
-    return null
+    console.log(error);
+    return { ok: false, data: null, error: error };
   }
 }
 

@@ -7,11 +7,12 @@ import { useAuthKey } from '../contexts/authStringContext';
 import { useRouter } from 'next/navigation';
 import { castVote } from '../api/voteApi'
 import { chooseMissOptions, optionContent } from '../config/options'
+import { toast } from "react-toastify";
 
 
 export default function ChooseMiss() {
 	const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
-	const { authKey } = useAuthKey();
+	const { authKey, clearAuthKey } = useAuthKey();
 	const router = useRouter();
 
 	const selectedOption = selectedIndex !== null ? selectedIndex + 1 : null;
@@ -20,19 +21,26 @@ export default function ChooseMiss() {
 		setSelectedIndex(selectedIndex === index ? null : index)
 	}
 
-	const handleFormSubmit = async () => {
-		if (!authKey) {
+	const handleSubmit = async () => {
+		if (selectedOption === null) {
+			toast.error("Вы не выбрали вариант!");
 			return;
 		}
-		if (selectedOption === null) {
-			console.warn('Не выбран вариант');
+		if (!authKey) {
+			toast.error("Вы перейшли не по QR коду, либо он уже использован!");
 			return;
 		}
 		try {
 			const res = await castVote(authKey, 'miss-fevmart', selectedOption);
-			router.push('/');
+			if (res.ok) {
+				clearAuthKey()
+				router.push('/');
+			} else {
+				toast.error("Попробуйте ещё раз или обновите старницу!");
+			}
 		} catch (err) {
-			console.log(err);
+			toast.error("Попробуйте ещё раз или обновите старницу!");
+			return
 		}
 	};
 
@@ -69,7 +77,7 @@ export default function ChooseMiss() {
 				</div>
 
 				<div className="absolute -bottom-20 left-0 w-full px-[max(4vw,4rem)]">
-					<Button onClick={handleFormSubmit}>Продолжить</Button>
+					<Button onClick={handleSubmit}>Продолжить</Button>
 				</div>
 			</div>
 		</div>
