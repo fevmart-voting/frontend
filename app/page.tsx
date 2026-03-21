@@ -1,42 +1,59 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Button from '@/app/components/button'
 import Table from "@/app/components/table"
+import { getStats } from './api/voteApi'
+
 
 interface DataEntry {
 	title: string
 	votes: number
 }
 
-const CLASS_VOTES: DataEntry[] = [
-	{ title: '10A', votes: 63 },
-	{ title: '10Б', votes: 69 },
-	{ title: '10В', votes: 52 },
-	{ title: '10Г', votes: 67 },
-	{ title: '10Д', votes: 65 },
-]
-
-const PERSON_VOTES: DataEntry[] = [
-	{ title: '10A', votes: 50 },
-	{ title: '10Б', votes: 56 },
-	{ title: '10В', votes: 69 },
-	{ title: '10Г', votes: 71 },
-	{ title: '10Д', votes: 70 },
-]
-
 type tabOptions = 'miss' | 'class'
 
 export default function Home() {
 	const [selectedTopic, setSelectedTopic] = useState<tabOptions>('miss')
+	const [missData, setMissData] = useState<DataEntry[]>([]);
+  	const [classData, setClassData] = useState<DataEntry[]>([]);
 
 	const toggleTopicButton = (topic: tabOptions) => {
 		setSelectedTopic(() => topic)
 	}
 
+	useEffect(() => {
+		async function fetchStats() {
+			try {
+				const [missStats, classStats] = await Promise.all([
+					getStats('miss-fevmart'),
+					getStats('best-class'),
+				]);
+
+				const titles = ['10А', '10Б', '10В', '10Г', '10Д'];
+
+				const missEntries = missStats.stats.map((votes: number, index: number) => ({
+					title: titles[index],
+					votes: votes,
+				}));
+
+				const classEntries = classStats.stats.map((votes: number, index: number) => ({
+					title: titles[index],
+					votes: votes,
+				}));
+
+				setMissData(missEntries);
+				setClassData(classEntries);
+			} catch (error) {
+				console.error('Failed to fetch stats', error);
+			}
+		}
+    	fetchStats();
+	}, []);
+
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { sortedData, q, d } = useMemo(() => {
-		const rawData = selectedTopic === 'miss' ? PERSON_VOTES : CLASS_VOTES
+		const rawData = selectedTopic === 'miss' ? missData : classData
 		const sorted = [...rawData].sort((a, b) => b.votes - a.votes)
 
 		const qVal = sorted.length > 0 ? sorted[sorted.length - 1].votes : 0
@@ -44,7 +61,7 @@ export default function Home() {
 		const dVal = wVal - qVal
 
 		return { sortedData: sorted, q: qVal, d: dVal }
-	}, [selectedTopic])
+	}, [selectedTopic, missData, classData])
 
 	const calculateWidth = (votes: number) => {
 		return (votes / sortedData[0]?.votes) * 100 // get percentage of max width
@@ -64,14 +81,26 @@ export default function Home() {
 
 				<div className="relative">
 					<div
-						className={`${isWinner ? 'bg-secondary text-text-dark' : 'bg-dark-2 text-text-bright'} py-3.5 rounded-xl flex items-center justify-end`}
-						style={{ width: `${width}%` }}>
-						<h3 className={`font-medium text-xl pr-4`}>{votes}</h3>
+					className={`${
+						isWinner ? 'bg-secondary text-text-dark' : 'bg-dark-2 text-text-bright'
+					} py-3.5 rounded-xl flex items-center justify-end`}
+					style={{
+						width: votes === 0 ? '3rem' : `${width}%`,
+					}}>
+					<h3 className="font-medium text-xl pr-4">{votes}</h3>
 					</div>
 				</div>
 			</div>
 		)
 	})
+
+	if (missData.length === 0 && classData.length === 0) {
+		return (
+		<div className="py-7 flex flex-col items-center justify-center min-h-screen">
+			<p className="text-text-bright text-xl">Загрузка результатов...</p>
+		</div>
+		);
+	}
 
 	return (
 		<div className="py-7 flex flex-col items-center">

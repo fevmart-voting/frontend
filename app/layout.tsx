@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './styles/globals.css'
 import Logo from '@/app/icons/logo.svg'
 import { Montserrat, Unbounded } from 'next/font/google'
+import { AuthKeyProvider } from './contexts/authStringContext'
 
 const montserrat = Montserrat({
 	subsets: ['cyrillic', 'cyrillic-ext'],
@@ -26,10 +27,12 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={`${montserrat} ${unbounded.className} antialiased bg-background px-4`}>
+				<AuthKeyProvider>
 				<div className="pt-7 flex flex-col items-center">
 					<Logo className="w-fit" />
 				</div>
 				{children}
+				</AuthKeyProvider>
 			</body>
 		</html>
 	)

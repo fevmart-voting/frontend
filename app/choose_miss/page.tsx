@@ -1,16 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Table from '../components/table'
 import Button from '../components/button'
+import { useAuthKey } from '../contexts/authStringContext';
+import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
+import { castVote } from '../api/voteApi'
+
 
 interface optionContent {
 	cl: string
 	name: string
 }
 
+
 export default function ChooseMiss() {
 	const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+	const { authKey } = useAuthKey();
+	const router = useRouter();
+
+	const selectedOption = selectedIndex !== null ? selectedIndex + 1 : null;
 
 	const toggleCheckbox = (index: number) => {
 		setSelectedIndex(selectedIndex === index ? null : index)
@@ -38,6 +48,23 @@ export default function ChooseMiss() {
 			name: 'Марочкин Т.',
 		},
 	]
+
+	const handleFormSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!authKey) {
+			return;
+		}
+		if (selectedOption === null) {
+			console.warn('Не выбран вариант');
+			return;
+		}
+		try {
+			const res = await castVote(authKey, 'miss-fevmart', selectedOption);
+			router.push('/');
+		} catch (err) {
+			console.log(err);
+		}
+	};
 
 	const options = optionsData.map(({ cl, name }: optionContent, index) => {
 		return (
@@ -72,7 +99,7 @@ export default function ChooseMiss() {
 				</div>
 
 				<div className="absolute -bottom-20 left-0 w-full px-[max(4vw,4rem)]">
-					<Button>Продолжить</Button>
+					<Button onClick={(e) => handleFormSubmit(e)}>Продолжить</Button>
 				</div>
 			</div>
 		</div>

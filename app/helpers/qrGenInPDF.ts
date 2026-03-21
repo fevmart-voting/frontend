@@ -1,11 +1,18 @@
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
+import { genAuthString } from './genAuthString';
 
 // Генерация PDF с QR-кодами размером 2.5×2.5 см, расстояние между ними 0.5 см.
 // На листе A4 размещается 6 колонок и 9 рядов (всего 54 QR-кода на странице).
 // Позиции рассчитываются так, чтобы всё было отцентрировано.
 
-export default async function QrGenratorInPDF  (keys: string[]) {
+export default async function QrGenratorInPDF  (amount: number) {
+  const keys: string[] = [];
+
+  for (let i = 0; i < amount; i++) {
+    keys.push(genAuthString());
+  }
+
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -34,11 +41,11 @@ export default async function QrGenratorInPDF  (keys: string[]) {
     const y = offsetY + row * step;
 
     const qrDataUrl = await QRCode.toDataURL(
-      `${process.env.NEXT_PUBLIC_FRONT_URL}/loading?ticket_key=${keys[i]}`,
+      `${process.env.NEXT_PUBLIC_FRONT_URL}/loading?auth_string=${keys[i]}`,
       { width: 200, margin: 0 }
     );
     doc.addImage(qrDataUrl, 'PNG', x, y, qrSize, qrSize);
   }
 
-  doc.save('tickets-qr.pdf');
+  doc.save('qrs.pdf');
 }

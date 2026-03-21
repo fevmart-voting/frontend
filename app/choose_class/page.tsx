@@ -1,16 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Table from '../components/table'
 import Button from '../components/button'
+import { useAuthKey } from '../contexts/authStringContext';
+import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
+import { castVote } from '../api/voteApi'
+
 
 interface optionContent {
 	cl: string
 	name: string
 }
 
+
 export default function ChooseClass() {
-	const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+	const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+	const { authKey } = useAuthKey();
+	const router = useRouter();
+
+	const selectedOption = selectedIndex !== null ? selectedIndex + 1 : null;
 
 	const toggleCheckbox = (index: number) => {
 		setSelectedIndex(selectedIndex === index ? null : index)
@@ -18,28 +28,47 @@ export default function ChooseClass() {
 
 	const optionsData: optionContent[] = [
 		{
-			cl: '10A',
-			name: 'Название 1',
+			cl: '10А',
+			name: 'Очумелые ручки',
 		},
 		{
 			cl: '10Б',
-			name: 'Название 2',
+			name: 'Барбарики',
 		},
 		{
 			cl: '10В',
-			name: 'Название 3',
+			name: 'Техастская резня бензопилой',
 		},
 		{
 			cl: '10Г',
-			name: 'Название 4',
+			name: 'Вдуть Марочкину',
 		},
 		{
 			cl: '10Д',
-			name: 'Название 5',
+			name: 'Елизовета Падловна',
 		},
-	]
+	];
 
-	const options = optionsData.map(({ cl, name }: optionContent, index) => {
+
+	const handleFormSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!authKey) {
+			return;
+		}
+		if (selectedOption === null) {
+			console.warn('Не выбран вариант');
+			return;
+		}
+		try {
+			const res = await castVote(authKey, 'best-class', selectedOption);
+			router.push('/choose_miss');
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+
+	const options = optionsData?.map(({ cl, name }: optionContent, index) => {
 		return (
 			<div
 				className={`grid grid-cols-[6.5rem_1fr_auto] items-center w-full`}
@@ -70,12 +99,10 @@ export default function ChooseClass() {
 				<div className=" w-full">
 					<Table tableName="chooseClass">{options}</Table>
 				</div>
-
 				<div className="absolute -bottom-20 left-0 w-full px-[max(4vw,4rem)]">
-					<Button>Продолжить</Button>
+					<Button onClick={(e) => handleFormSubmit(e)}>Продолжить</Button>
 				</div>
 			</form>
 		</div>
 	)
 }
-//Выберите Класс с лучшим выступлением
