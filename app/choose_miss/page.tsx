@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { castVote } from '../api/voteApi'
 import { chooseMissOptions, optionContent } from '../config/options'
 import { toast } from "react-toastify";
+import LoadingSpinner from '../components/loadingSpinner';
 
 
 export default function ChooseMiss() {
@@ -49,6 +50,16 @@ export default function ChooseMiss() {
 			toast.error("Обновите старницу или же QR уже использован!");
 		}
 	};
+
+	if (isLoading) {
+		return (
+			<div className="px-6 py-7 flex flex-col items-center">
+				<div className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center">
+					<LoadingSpinner/>
+				</div>
+			</div>
+		)
+	}
 
 	const options = chooseMissOptions.map(({ cl, name }: optionContent, index) => {
 		return (

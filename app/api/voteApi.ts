@@ -1,4 +1,4 @@
-const DEFAULT_API_BASE_URL = process.env.NEXT_PUBLIC_BACK_URL ?? 'http://localhost:8085'
+const DEFAULT_API_BASE_URL = process.env.NEXT_PUBLIC_BACK_URL ?? ''
 
 
 export async function castVote(auth: string, election: string, option: number) {

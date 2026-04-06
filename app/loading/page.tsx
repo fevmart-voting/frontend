@@ -1,10 +1,10 @@
 'use client'
 
-import { Grid } from 'react-loader-spinner';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getStats } from '../api/voteApi';
 import { useEffect } from 'react';
 import { useAuthKey } from '../contexts/authStringContext';
+import LoadingSpinner from '../components/loadingSpinner';
 
 
 export default function Loading() {
@@ -42,16 +42,7 @@ export default function Loading() {
 		<div className="px-6 py-7 flex flex-col items-center">
 			<div className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center">
 				<div className="mb-25">
-					<Grid
-						visible={true}
-						height="120"
-						width="120"
-						color="#CAF247"
-						ariaLabel="grid-loading"
-						radius="12.5"
-						wrapperStyle={{}}
-						wrapperClass="grid-wrapper"
-					/>
+					<LoadingSpinner/>
 				</div>
 
 				<p className="text-center text-bright text-2xl">Голосование ещё не началось, пожалуйста подождите и обновите страницу...</p>

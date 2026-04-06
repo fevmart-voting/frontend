@@ -29,11 +29,11 @@ export default function RootLayout({
 		<html lang="en">
 			<body className={`${montserrat} ${unbounded.className} antialiased bg-background px-4`}>
 				<AuthKeyProvider>
-				<div className="pt-7 flex flex-col items-center">
-					<Logo className="w-fit" />
-				</div>
-				{children}
-				<ToastContext/>
+					<div className="pt-7 flex flex-col items-center">
+						<Logo className="w-fit" />
+					</div>
+					{children}
+					<ToastContext/>
 				</AuthKeyProvider>
 			</body>
 		</html>
