@@ -15,7 +15,9 @@ export default function Loading() {
 	useEffect(() => {
 
 		const auth_string = searchParams.get('auth_string');
+
 		if (!auth_string) {
+			router.push('/');
 			return
 		}
 

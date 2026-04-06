@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 
 export default function ChooseMiss() {
 	const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const { authKey, clearAuthKey } = useAuthKey();
 	const router = useRouter();
 
@@ -22,6 +23,8 @@ export default function ChooseMiss() {
 	}
 
 	const handleSubmit = async () => {
+		if (isLoading) return;
+
 		if (selectedOption === null) {
 			toast.error("Вы не выбрали вариант!");
 			return;
@@ -30,17 +33,20 @@ export default function ChooseMiss() {
 			toast.error("Вы перейшли не по QR коду, либо он уже использован!");
 			return;
 		}
+		setIsLoading(true);
 		try {
 			const res = await castVote(authKey, 'miss-fevmart', selectedOption);
 			if (res.ok) {
+				toast.success("Голос принят! Переход...");
+				setTimeout(() => {
+					router.push('/');
+				}, 800);
 				clearAuthKey()
-				router.push('/');
 			} else {
-				toast.error("Попробуйте ещё раз или обновите старницу!");
+				toast.error("Обновите старницу или же QR уже использован!");
 			}
 		} catch (err) {
-			toast.error("Попробуйте ещё раз или обновите старницу!");
-			return
+			toast.error("Обновите старницу или же QR уже использован!");
 		}
 	};
 

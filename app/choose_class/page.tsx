@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Grid } from 'react-loader-spinner';
 import Table from '../components/table'
 import Button from '../components/button'
 import { useAuthKey } from '../contexts/authStringContext';
@@ -12,6 +13,7 @@ import { toast } from "react-toastify";
 
 export default function ChooseClass() {
 	const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const { authKey } = useAuthKey();
 	const router = useRouter();
 
@@ -22,6 +24,8 @@ export default function ChooseClass() {
 	}
 
 	const handleSubmit = async () => {
+		if (isLoading) return;
+
 		if (selectedOption === null) {
 			toast.error("Вы не выбрали вариант!");
 			return;
@@ -30,18 +34,44 @@ export default function ChooseClass() {
 			toast.error("Вы перейшли не по QR коду, либо он уже использован!");
 			return;
 		}
+		setIsLoading(true);
 		try {
 			const res = await castVote(authKey, 'best-class', selectedOption);
 			if (res.ok) {
-				router.push('/choose_miss');
+				toast.success("Голос принят! Переход...");
+				setTimeout(() => {
+					router.push('/choose_miss');
+				}, 800);
 			} else {
-				toast.error("Попробуйте ещё раз или обновите старницу!");
+				toast.error("Обновите старницу или же QR уже использован!");
 			}
 		} catch (err) {
-			toast.error("Попробуйте ещё раз или обновите старницу!");
-			return
+			toast.error("Обновите старницу или же QR уже использован!");
+		} finally {
+			setIsLoading(false);
 		}
 	};
+
+	if (isLoading) {
+		return (
+			<div className="px-6 py-7 flex flex-col items-center">
+				<div className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center">
+					<div className="mb-25">
+						<Grid
+							visible={true}
+							height="120"
+							width="120"
+							color="#CAF247"
+							ariaLabel="grid-loading"
+							radius="12.5"
+							wrapperStyle={{}}
+							wrapperClass="grid-wrapper"
+						/>
+					</div>
+				</div>
+			</div>
+		)
+	}
 
 	const options = chooseClassOptions?.map(({ cl, name }: optionContent, index) => {
 		return (
